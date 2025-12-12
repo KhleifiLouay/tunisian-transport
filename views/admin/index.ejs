@@ -1,0 +1,631 @@
+<%- include('../partials/header') %>
+<style>
+  .admin-header {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.2) 0%, rgba(52, 152, 219, 0.2) 100%);
+    border: 1px solid rgba(30, 58, 95, 0.2);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .admin-header-content h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff 0%, #5dade2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .admin-header-content p {
+    color: #94a3b8;
+    font-size: 15px;
+  }
+
+  .admin-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .admin-stat {
+    text-align: center;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .admin-stat .value {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e3a5f, #3498db);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .admin-stat .label {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title svg {
+    color: #1e3a5f;
+    width: 24px;
+    height: 24px;
+  }
+
+  .admin-form {
+    display: grid;
+    gap: 16px;
+  }
+
+  .admin-form input,
+  .admin-form select {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+  }
+
+  .admin-form input:focus,
+  .admin-form select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  }
+
+  .user-list {
+    max-height: 320px;
+    overflow-y: auto;
+    display: grid;
+    gap: 8px;
+    padding-right: 8px;
+  }
+
+  .user-item {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+  }
+
+  .user-item:hover {
+    border-color: rgba(52, 152, 219, 0.3);
+    background: rgba(30, 41, 59, 0.8);
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .user-name {
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 14px;
+  }
+
+  .user-email {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  .trip-manage-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+
+  .trip-manage-card:hover {
+    border-color: rgba(52, 152, 219, 0.3);
+  }
+
+  .trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 16px;
+  }
+
+  .trip-route {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .trip-route::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #1e3a5f, #3498db);
+    border-radius: 50%;
+  }
+
+  .trip-meta {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .driver-status {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .driver-status.assigned {
+    color: #22c55e;
+  }
+
+  .driver-status.unassigned {
+    color: #ef4444;
+  }
+
+  .trip-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .trip-actions select {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .driver-table-wrap {
+    max-height: 400px;
+    overflow: auto;
+  }
+
+  .user-manage-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+  }
+
+  .user-manage-card:hover {
+    border-color: rgba(52, 152, 219, 0.2);
+  }
+
+  .user-manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .user-manage-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-manage-info p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 4px 0;
+  }
+
+  .user-manage-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 200px;
+  }
+
+  .user-manage-form input,
+  .user-manage-form select {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .user-bookings-section {
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .user-bookings-section h4 {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .user-booking-table {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .user-booking-table table {
+    font-size: 13px;
+  }
+
+  .empty-bookings {
+    color: #64748b;
+    font-style: italic;
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .user-manage-header {
+      flex-direction: column;
+    }
+
+    .trip-actions {
+      flex-direction: column;
+    }
+
+    .trip-actions select,
+    .trip-actions button {
+      width: 100%;
+    }
+  }
+</style>
+
+<main class="container">
+  <!-- Admin Header -->
+  <div class="admin-header">
+    <div class="admin-header-content">
+      <h1>Admin Dashboard</h1>
+      <p>Manage users, trips, bookings, and drivers</p>
+    </div>
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="value"><%= users.length %></div>
+        <div class="label">Users</div>
+      </div>
+      <div class="admin-stat">
+        <div class="value"><%= trips.length %></div>
+        <div class="label">Trips</div>
+      </div>
+      <div class="admin-stat">
+        <div class="value"><%= bookings.length %></div>
+        <div class="label">Bookings</div>
+      </div>
+      <div class="admin-stat">
+        <div class="value"><%= availableDrivers.length %></div>
+        <div class="label">Drivers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+    <!-- Add User -->
+    <div class="card">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <line x1="20" y1="8" x2="20" y2="14"/>
+          <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+        Add User
+      </h2>
+      <form method="post" action="/admin/users" class="admin-form">
+        <input required name="name" class="input" placeholder="Name"/>
+        <input required name="email" type="email" class="input" placeholder="Email"/>
+        <input required name="password" type="password" class="input" placeholder="Password"/>
+        <select name="role" class="input">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+          <option value="driver">Driver</option>
+        </select>
+        <button class="btn btn-primary">Create User</button>
+      </form>
+    </div>
+
+    <!-- Add Trip -->
+    <div class="card">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+        Add Trip
+      </h2>
+      <form method="post" action="/admin/trips" class="admin-form">
+        <input required name="origin" class="input" placeholder="Origin (e.g., Tunis)"/>
+        <input required name="destination" class="input" placeholder="Destination (e.g., Sousse)"/>
+        <input required name="date" class="input" placeholder="YYYY-MM-DD HH:mm"/>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <input required name="price" type="number" step="0.01" class="input" placeholder="Price (TND)"/>
+          <input required name="seats" type="number" min="0" max="8" class="input" placeholder="Seats" value="8"/>
+        </div>
+        <input required name="departure_time" type="time" class="input" value="08:00"/>
+        <button class="btn btn-primary">Add Trip</button>
+      </form>
+    </div>
+
+    <!-- Users List -->
+    <div class="card">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users (<%= users.length %>)
+      </h2>
+      <div class="user-list">
+        <% users.forEach(u => { %>
+          <div class="user-item">
+            <div class="user-info">
+              <span class="user-name"><%= u.name %></span>
+              <span class="user-email"><%= u.email %></span>
+            </div>
+            <span class="badge <%= u.role === 'admin' ? '' : u.role === 'driver' ? 'badge-warning' : 'badge-success' %>">
+              <%= u.role %>
+            </span>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Bookings -->
+  <div class="section card">
+    <h2 class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      All Bookings (<%= bookings.length %>)
+    </h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Route</th>
+            <th>Date</th>
+            <th>Price</th>
+            <th>Booked</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bookings.forEach(b => { %>
+            <tr>
+              <td style="font-weight: 600; color: #f8fafc;"><%= b.user_name %></td>
+              <td><%= b.email %></td>
+              <td><%= b.origin %> → <%= b.destination %></td>
+              <td><%= b.date %></td>
+              <td style="color: #14b8a6; font-weight: 600;"><%= b.price %> TND</td>
+              <td style="font-size: 13px;"><%= b.created_at %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Manage Trips & Assign Drivers -->
+  <div class="section card">
+    <h2 class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Manage Trips & Assign Drivers
+    </h2>
+    <div class="form-grid" style="max-height: 600px; overflow-y: auto;">
+      <% tripsWithDrivers.forEach(t => { %>
+        <div class="trip-manage-card">
+          <div class="trip-header">
+            <div>
+              <div class="trip-route"><%= t.origin %> → <%= t.destination %></div>
+              <div class="trip-meta">
+                Date: <%= t.date %> | Departure: <%= t.departure_time %> | Price: <%= t.price %> TND | Seats: <%= t.seats %>
+              </div>
+              <% if (t.driver) { %>
+                <div class="driver-status assigned">
+                  ✓ Driver: <%= t.driver.full_name %> (<%= t.driver.vehicle_model %>)
+                </div>
+              <% } else { %>
+                <div class="driver-status unassigned">
+                  ⚠ No driver assigned
+                </div>
+              <% } %>
+            </div>
+          </div>
+          <form method="post" action="/admin/trips/assign-driver" class="trip-actions">
+            <input type="hidden" name="trip_id" value="<%= t.id %>"/>
+            <select name="driver_id" class="input">
+              <option value="">-- No Driver --</option>
+              <% availableDrivers.forEach(driver => { %>
+                <%
+                  const driverCities = driver.cities.toLowerCase().split(',').map(c => c.trim());
+                  const canDrive = driverCities.includes(t.origin.toLowerCase()) || driverCities.includes(t.destination.toLowerCase());
+                %>
+                <% if (canDrive) { %>
+                  <option value="<%= driver.id %>" <%= t.driver_id == driver.id ? 'selected' : '' %>>
+                    <%= driver.full_name %> - <%= driver.vehicle_model %> (Available: <%= driver.available_date %> <%= driver.available_time %>)
+                  </option>
+                <% } %>
+              <% }) %>
+            </select>
+            <button class="btn btn-primary">Assign</button>
+            <button formaction="/admin/trips/delete" class="btn btn-danger" onclick="return confirm('Delete this trip?')">Delete</button>
+            <input type="hidden" name="id" value="<%= t.id %>"/>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Available Drivers -->
+  <div class="section card">
+    <h2 class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 17H5a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm12-2h-4a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+        <path d="M17 17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h8"/>
+        <circle cx="7.5" cy="17" r="2.5"/>
+        <circle cx="17.5" cy="17" r="2.5"/>
+      </svg>
+      Available Drivers (<%= availableDrivers.length %>)
+    </h2>
+    <% if (availableDrivers.length === 0) { %>
+      <p class="empty-bookings">No drivers registered yet.</p>
+    <% } else { %>
+      <div class="driver-table-wrap">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>ID Number</th>
+                <th>Available Date</th>
+                <th>Available Time</th>
+                <th>Cities</th>
+                <th>Vehicle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% availableDrivers.forEach(driver => { %>
+                <tr>
+                  <td>
+                    <strong style="color: #f8fafc;"><%= driver.full_name %></strong>
+                    <br/>
+                    <small style="color: #64748b;"><%= driver.email %></small>
+                  </td>
+                  <td><%= driver.id_number %></td>
+                  <td><%= driver.available_date %></td>
+                  <td><%= driver.available_time %></td>
+                  <td><%= driver.cities %></td>
+                  <td style="color: #14b8a6; font-weight: 600;"><%= driver.vehicle_model %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Manage Users -->
+  <div class="section card">
+    <h2 class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      Manage Users & Bookings
+    </h2>
+    <div style="max-height: 800px; overflow-y: auto;">
+      <% usersWithBookings.forEach(u => { %>
+        <div class="user-manage-card">
+          <div class="user-manage-header">
+            <div class="user-manage-info">
+              <h3>
+                <%= u.name %>
+                <span class="badge <%= u.role === 'admin' ? '' : u.role === 'driver' ? 'badge-warning' : 'badge-success' %>">
+                  <%= u.role %>
+                </span>
+              </h3>
+              <p><strong>Email:</strong> <%= u.email %></p>
+              <p><strong>Total Bookings:</strong> <%= u.totalBookings %> | <strong>Total Spent:</strong> <%= u.totalSpent.toFixed(2) %> TND</p>
+            </div>
+            <form method="post" action="/admin/users/update" class="user-manage-form">
+              <input type="text" name="name" value="<%= u.name %>" class="input" required/>
+              <input type="email" name="email" value="<%= u.email %>" class="input" required/>
+              <select name="role" class="input">
+                <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>User</option>
+                <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                <option value="driver" <%= u.role === 'driver' ? 'selected' : '' %>>Driver</option>
+              </select>
+              <input type="hidden" name="id" value="<%= u.id %>"/>
+              <button class="btn btn-primary">Update</button>
+              <button formaction="/admin/users/delete" class="btn btn-danger" onclick="return confirm('Delete this user and all their bookings?')">Delete User</button>
+            </form>
+          </div>
+
+          <% if (u.bookings && u.bookings.length > 0) { %>
+            <div class="user-bookings-section">
+              <h4>User's Bookings:</h4>
+              <div class="user-booking-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Route</th>
+                      <th>Date</th>
+                      <th>Price</th>
+                      <th>Booked At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% u.bookings.forEach(booking => { %>
+                      <tr>
+                        <td style="font-weight: 600; color: #f8fafc;"><%= booking.origin %> → <%= booking.destination %></td>
+                        <td><%= booking.date %></td>
+                        <td style="color: #14b8a6; font-weight: 600;"><%= booking.price %> TND</td>
+                        <td style="font-size: 12px;"><%= booking.created_at %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% } else { %>
+            <div class="user-bookings-section">
+              <p class="empty-bookings">No bookings yet.</p>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

@@ -1,0 +1,414 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.1) 0%, rgba(52, 152, 219, 0.1) 50%, rgba(230, 126, 34, 0.1) 100%);
+    border: 1px solid rgba(30, 58, 95, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(52, 152, 219, 0.08) 0%, transparent 50%);
+    animation: pulse-bg 8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-bg {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(25%, 25%) scale(1.1); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .feature-card {
+    background: white;
+    border: 1px solid rgba(30, 58, 95, 0.1);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.05);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(52, 152, 219, 0.3);
+    box-shadow: 0 20px 40px rgba(30, 58, 95, 0.15);
+  }
+
+  .feature-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #1e3a5f 0%, #3498db 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(30, 58, 95, 0.3);
+  }
+
+  .feature-icon svg {
+    width: 32px;
+    height: 32px;
+    color: white;
+  }
+
+  .routes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .route-item {
+    background: rgba(30, 58, 95, 0.08);
+    border: 1px solid rgba(30, 58, 95, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .route-item:hover {
+    background: rgba(52, 152, 219, 0.15);
+    border-color: rgba(52, 152, 219, 0.3);
+    transform: scale(1.02);
+  }
+
+  .route-item span {
+    color: #212529;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid #d5e8f7;
+    box-shadow: 0 8px 32px rgba(30, 58, 95, 0.1);
+  }
+
+  .developer-section {
+    background: linear-gradient(135deg, rgba(32, 201, 151, 0.1) 0%, rgba(56, 217, 169, 0.1) 100%);
+    border: 1px solid rgba(32, 201, 151, 0.2);
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 50%, #3498db 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #5dade2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+</style>
+
+<main class="container">
+  <!-- Hero Section -->
+  <section class="card hero-section" style="text-align: center; padding: 64px 32px;">
+    <div class="hero-content">
+      <h1 class="hero-title" style="font-size: clamp(36px, 6vw, 56px); margin-bottom: 20px; background: linear-gradient(135deg, #1e3a5f 0%, #3498db 50%, #e67e22 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Explore Tunisia, One Trip at a Time
+      </h1>
+      <p class="lead" style="max-width: 700px; margin: 0 auto 32px; font-size: 18px; color: #495057;">
+        Your gateway to seamless travel across Tunisia. Book intercity trips connecting the coast to the interior - from Tunis and Sousse to Sfax, Bizerte, Gabes, and beyond.
+      </p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="/login" class="btn btn-primary" style="padding: 14px 32px; font-size: 16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Book Now
+        </a>
+        <a href="/auth/signup" class="btn btn-secondary" style="padding: 14px 32px; font-size: 16px;">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="section">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2 class="h1" style="font-size: 32px; margin-bottom: 12px; color: #212529;">Why Choose Loagi?</h2>
+      <p class="lead" style="max-width: 600px; margin: 0 auto; color: #495057;">Experience the best of Tunisian transportation with our modern booking platform</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 12px; color: #212529;">Nationwide Coverage</h3>
+        <p style="color: #495057; font-size: 15px; line-height: 1.6;">
+          Connect to major cities across Tunisia including Tunis, Sousse, Sfax, Bizerte, Gabes, Gafsa, and more.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 12px; color: #212529;">Easy Booking</h3>
+        <p style="color: #495057; font-size: 15px; line-height: 1.6;">
+          Simple and secure online booking with instant confirmation. Get your digital ticket with QR code.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1v22"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 12px; color: #212529;">Best Prices</h3>
+        <p style="color: #495057; font-size: 15px; line-height: 1.6;">
+          Affordable fares with transparent pricing. No hidden fees, just great value for your travels.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4"/>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            <path d="M3 5c0-1.66 4-3 9-3s9 1.34 9 3"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 12px; color: #212529;">Verified Drivers</h3>
+        <p style="color: #495057; font-size: 15px; line-height: 1.6;">
+          All our drivers are verified and experienced. Travel with confidence and safety.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About & Map Section -->
+  <section class="section">
+    <div class="grid grid-md-2" style="gap: 32px; align-items: start;">
+      <div class="card">
+        <h2 class="h1" style="font-size: 28px; margin-bottom: 20px;">
+          <span style="display: flex; align-items: center; gap: 12px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #1e3a5f;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            About Loagi
+          </span>
+        </h2>
+        <p style="color: #495057; font-size: 16px; line-height: 1.8; margin-bottom: 24px;">
+          Discover the beauty of Tunisia with Loagi's comprehensive transportation network. Whether you're traveling for business or leisure, we connect major cities and destinations across the country with reliable and affordable options.
+        </p>
+
+        <div style="background: rgba(30, 58, 95, 0.08); padding: 24px; border-radius: 12px; border: 1px solid rgba(30, 58, 95, 0.15);">
+          <h3 style="font-size: 18px; margin-bottom: 16px; color: #212529; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #1e3a5f;">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+            Popular Routes
+          </h3>
+          <div class="routes-grid">
+            <div class="route-item">
+              <span>Tunis - Sousse</span>
+            </div>
+            <div class="route-item">
+              <span>Tunis - Sfax</span>
+            </div>
+            <div class="route-item">
+              <span>Sfax - Gafsa</span>
+            </div>
+            <div class="route-item">
+              <span>Tunis - Bizerte</span>
+            </div>
+            <div class="route-item">
+              <span>Tunis - Gabes</span>
+            </div>
+            <div class="route-item">
+              <span>Sousse - Sidi Bouzid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 24px;">
+        <h2 class="h1" style="font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #20c997;">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
+          </svg>
+          Explore Tunisia
+        </h2>
+        <div class="map-container">
+          <div id="tunisia-map" style="width: 100%; height: 400px;"></div>
+        </div>
+        <p style="margin-top: 16px; color: #868e96; font-size: 14px; text-align: center;">
+          Interactive map showing our coverage across Tunisia
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section card cta-section" style="text-align: center; padding: 48px 32px;">
+    <div style="position: relative; z-index: 1;">
+      <h2 style="font-size: 32px; font-weight: 800; color: white; margin-bottom: 16px;">
+        Ready to Start Your Journey?
+      </h2>
+      <p style="color: rgba(255, 255, 255, 0.9); font-size: 18px; margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        Join thousands of travelers who trust Loagi for their intercity transportation needs.
+      </p>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">10+</div>
+          <div class="stat-label">Cities</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">Routes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">1000+</div>
+          <div class="stat-label">Happy Travelers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Credit -->
+  <section class="section card developer-section" style="text-align: center; padding: 40px;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #20c997, #38d9a9); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(32, 201, 151, 0.3);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <polyline points="17 11 19 13 23 9"/>
+        </svg>
+      </div>
+      <div style="text-align: left;">
+        <p style="color: #868e96; font-size: 14px; margin-bottom: 4px;">Developed by</p>
+        <h3 style="font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #20c997, #38d9a9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0;">
+          Khleifi Louay
+        </h3>
+        <p style="color: #868e96; font-size: 14px; margin-top: 4px;">Building seamless transportation solutions for Tunisia</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Initialize map centered on Tunisia
+  var map = L.map('tunisia-map').setView([34.0, 9.5], 7);
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Custom icon for markers
+  var customIcon = L.divIcon({
+    className: 'custom-marker',
+    html: '<div style="background: linear-gradient(135deg, #1e3a5f, #3498db); width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
+  // Add markers for major cities
+  var cities = [
+    { name: 'Tunis', lat: 36.8065, lng: 10.1815 },
+    { name: 'Sousse', lat: 35.8288, lng: 10.6405 },
+    { name: 'Sfax', lat: 34.7400, lng: 10.7600 },
+    { name: 'Bizerte', lat: 37.2744, lng: 9.8739 },
+    { name: 'Gabes', lat: 33.8815, lng: 10.0982 },
+    { name: 'Gafsa', lat: 34.4250, lng: 8.7842 },
+    { name: 'Sidi Bouzid', lat: 35.0354, lng: 9.4839 }
+  ];
+
+  cities.forEach(function(city) {
+    L.marker([city.lat, city.lng], { icon: customIcon })
+      .addTo(map)
+      .bindPopup('<strong style="color: #212529;">' + city.name + '</strong>');
+  });
+
+  // Draw route lines between major cities
+  var routeStyle = { color: '#3498db', weight: 2, opacity: 0.6, dashArray: '5, 10' };
+
+  // Tunis connections
+  L.polyline([[36.8065, 10.1815], [35.8288, 10.6405]], routeStyle).addTo(map); // Tunis-Sousse
+  L.polyline([[36.8065, 10.1815], [34.7400, 10.7600]], routeStyle).addTo(map); // Tunis-Sfax
+  L.polyline([[36.8065, 10.1815], [37.2744, 9.8739]], routeStyle).addTo(map); // Tunis-Bizerte
+  L.polyline([[36.8065, 10.1815], [33.8815, 10.0982]], routeStyle).addTo(map); // Tunis-Gabes
+
+  // Other connections
+  L.polyline([[35.8288, 10.6405], [35.0354, 9.4839]], routeStyle).addTo(map); // Sousse-Sidi Bouzid
+  L.polyline([[34.7400, 10.7600], [34.4250, 8.7842]], routeStyle).addTo(map); // Sfax-Gafsa
+</script>
+<%- include('partials/footer') %>

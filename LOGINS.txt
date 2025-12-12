@@ -1,0 +1,19 @@
+Default Login Credentials:
+Admin Accounts:
+
+Email: admin@tt.tn
+
+Password: admin123
+
+Email: admin@gmail.com
+
+Password: admin1234
+
+Regular User:
+
+Email: user@tt.tn
+Password: user123
+Driver Account:
+
+Email: driver@gmail.com
+Password: driver1234

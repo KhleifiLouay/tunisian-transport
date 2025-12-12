@@ -1,0 +1,466 @@
+<%- include('../partials/header') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  .ticket-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .ticket-card {
+    background: white;
+    border: 2px solid rgba(30, 58, 95, 0.2);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(30, 58, 95, 0.15);
+  }
+
+  .ticket-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 50%, #3498db 100%);
+    padding: 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ticket-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .ticket-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ticket-header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ticket-body {
+    padding: 32px;
+  }
+
+  .ticket-section {
+    margin-bottom: 28px;
+  }
+
+  .ticket-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #1e3a5f;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .user-info {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.08) 0%, rgba(52, 152, 219, 0.08) 100%);
+    border: 1px solid rgba(30, 58, 95, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .user-info p {
+    margin: 8px 0;
+    color: #212529;
+    font-size: 15px;
+  }
+
+  .user-info strong {
+    color: #495057;
+    font-weight: 500;
+    margin-right: 8px;
+  }
+
+  .trip-item {
+    background: #f0f7fc;
+    border: 1px solid #d5e8f7;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  .trip-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .trip-route {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .trip-route::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #1e3a5f, #3498db);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+  }
+
+  .trip-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .trip-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #495057;
+    font-size: 14px;
+  }
+
+  .trip-meta-item svg {
+    width: 16px;
+    height: 16px;
+    color: #868e96;
+  }
+
+  .trip-meta-item.price {
+    color: #28a745;
+    font-weight: 600;
+  }
+
+  .total-section {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.12) 0%, rgba(32, 201, 151, 0.12) 100%);
+    border: 1px solid rgba(40, 167, 69, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .total-label {
+    font-size: 16px;
+    color: #495057;
+  }
+
+  .total-amount {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .booking-code-section {
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+    border: 2px solid rgba(230, 126, 34, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .booking-code-section h4 {
+    color: #d35400;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .booking-code-value {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: monospace;
+    letter-spacing: 4px;
+    color: #d35400;
+    background: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 2px dashed rgba(230, 126, 34, 0.3);
+  }
+
+  .booking-code-section p {
+    margin-top: 12px;
+    color: #d35400;
+    font-size: 13px;
+  }
+
+  .qr-section {
+    text-align: center;
+    padding: 24px;
+    background: #f0f7fc;
+    border-radius: 16px;
+    border: 1px dashed #d5e8f7;
+  }
+
+  .qr-container {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    display: inline-block;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .qr-container img {
+    max-width: 250px;
+    width: 100%;
+    display: block;
+  }
+
+  .qr-label {
+    margin-top: 16px;
+    color: #868e96;
+    font-size: 13px;
+  }
+
+  .qr-info {
+    margin-top: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.15) 0%, rgba(243, 156, 18, 0.15) 100%);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    border-radius: 8px;
+    color: #d35400;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .ticket-footer {
+    padding: 24px 32px;
+    border-top: 1px dashed #d5e8f7;
+    background: #f0f7fc;
+  }
+
+  .ticket-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  @media print {
+    .ticket-actions, .hero, .footer {
+      display: none !important;
+    }
+
+    body {
+      background: white !important;
+    }
+
+    .ticket-card {
+      box-shadow: none;
+      border: 1px solid #ddd;
+    }
+
+    .ticket-container {
+      max-width: 100%;
+    }
+  }
+</style>
+
+<main class="container">
+  <div class="ticket-container">
+    <div class="ticket-card" id="ticket-content">
+      <div class="ticket-header">
+        <h1>Booking Confirmed!</h1>
+        <p>Your ticket has been successfully generated</p>
+      </div>
+
+      <div class="ticket-body">
+        <!-- Booking Code (Prominent Display) -->
+        <div class="ticket-section">
+          <div class="booking-code-section">
+            <h4>Your Booking Code</h4>
+            <div class="booking-code-value"><%= bookingCode %></div>
+            <p>Show this code to the driver for verification</p>
+          </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="ticket-section">
+          <div class="section-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Passenger Information
+          </div>
+          <div class="user-info">
+            <p><strong>Name:</strong> <%= user %></p>
+            <p><strong>Email:</strong> <%= email %></p>
+          </div>
+        </div>
+
+        <!-- Trip Details -->
+        <div class="ticket-section">
+          <div class="section-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+            Trip Details
+          </div>
+          <% if (Array.isArray(ticketData)) { %>
+            <% ticketData.forEach((trip, index) => { %>
+              <div class="trip-item">
+                <div class="trip-route"><%= trip.origin %> - <%= trip.destination %></div>
+                <div class="trip-meta">
+                  <div class="trip-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <%= trip.date %>
+                  </div>
+                  <div class="trip-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <%= trip.departure_time || '08:00' %>
+                  </div>
+                  <div class="trip-meta-item price">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"/>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <%= trip.price %> TND
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="trip-item">
+              <div class="trip-route"><%= ticketData.origin %> - <%= ticketData.destination %></div>
+              <div class="trip-meta">
+                <div class="trip-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <%= ticketData.date %>
+                </div>
+                <div class="trip-meta-item price">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                  <%= ticketData.price %> TND
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Total -->
+        <div class="ticket-section">
+          <div class="total-section">
+            <span class="total-label">Total Amount</span>
+            <span class="total-amount"><%= totalCost %> TND</span>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="ticket-section">
+          <div class="section-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <rect x="7" y="7" width="3" height="3"/>
+              <rect x="14" y="7" width="3" height="3"/>
+              <rect x="7" y="14" width="3" height="3"/>
+              <rect x="14" y="14" width="3" height="3"/>
+            </svg>
+            QR Code
+          </div>
+          <div class="qr-section">
+            <div class="qr-container">
+              <img src="<%= qrCodeData %>" alt="Ticket QR Code"/>
+            </div>
+            <p class="qr-label">Driver can scan this code to verify your booking</p>
+            <div class="qr-info">
+              This QR code contains your booking ID: <strong><%= bookingCode %></strong>
+              <br/>Once verified by the driver, this ticket will be marked as used.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-footer no-print">
+        <div class="ticket-actions">
+          <button onclick="downloadPDF()" class="btn btn-primary" style="padding: 12px 24px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download PDF
+          </button>
+          <button onclick="window.print()" class="btn btn-secondary" style="padding: 12px 24px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Print Ticket
+          </button>
+          <a href="/dashboard" class="btn btn-secondary" style="padding: 12px 24px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function downloadPDF() {
+  const element = document.getElementById('ticket-content');
+  const opt = {
+    margin: 10,
+    filename: 'loagi-ticket-<%= bookingCode %>.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Hide the action buttons before generating PDF
+  const footer = document.querySelector('.ticket-footer');
+  footer.style.display = 'none';
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    footer.style.display = '';
+  });
+}
+</script>
+<%- include('../partials/footer') %>

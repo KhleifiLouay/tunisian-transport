@@ -1,0 +1,112 @@
+  </div><!-- End page-content -->
+  <footer class="footer">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; text-align: left; margin-bottom: 32px;">
+        <div>
+          <h4 style="color: #212529; font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ff6b6b;">
+              <path d="M9 17H5a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm12-2h-4a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+              <path d="M17 17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h8"/>
+              <circle cx="7.5" cy="17" r="2.5"/>
+              <circle cx="17.5" cy="17" r="2.5"/>
+            </svg>
+            Loagi
+          </h4>
+          <p style="color: #495057; font-size: 14px; line-height: 1.7;">
+            Your gateway to seamless travel across Tunisia. Connecting cities with reliable, affordable transportation.
+          </p>
+        </div>
+        <div>
+          <h4 style="color: #212529; font-size: 16px; margin-bottom: 16px;">Popular Routes</h4>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="margin-bottom: 8px;"><a href="/dashboard" style="color: #495057; font-size: 14px; transition: color 0.2s;">Tunis - Sousse</a></li>
+            <li style="margin-bottom: 8px;"><a href="/dashboard" style="color: #495057; font-size: 14px; transition: color 0.2s;">Tunis - Sfax</a></li>
+            <li style="margin-bottom: 8px;"><a href="/dashboard" style="color: #495057; font-size: 14px; transition: color 0.2s;">Sfax - Gafsa</a></li>
+            <li style="margin-bottom: 8px;"><a href="/dashboard" style="color: #495057; font-size: 14px; transition: color 0.2s;">Tunis - Bizerte</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: #212529; font-size: 16px; margin-bottom: 16px;">Quick Links</h4>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="margin-bottom: 8px;"><a href="/" style="color: #495057; font-size: 14px; transition: color 0.2s;">Home</a></li>
+            <li style="margin-bottom: 8px;"><a href="/dashboard" style="color: #495057; font-size: 14px; transition: color 0.2s;">Book a Trip</a></li>
+            <li style="margin-bottom: 8px;"><a href="/login" style="color: #495057; font-size: 14px; transition: color 0.2s;">Login</a></li>
+            <li style="margin-bottom: 8px;"><a href="/auth/signup" style="color: #495057; font-size: 14px; transition: color 0.2s;">Sign Up</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: #212529; font-size: 16px; margin-bottom: 16px;">Contact</h4>
+          <p style="color: #495057; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            Tunisia
+          </p>
+          <p style="color: #495057; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            contact@loagi.tn
+          </p>
+        </div>
+      </div>
+      <hr style="border: none; border-top: 1px solid #ffe3e3; margin: 24px 0;"/>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <p style="color: #495057; font-size: 14px; margin: 0;">
+          Made with
+          <span style="color: #ff6b6b;">&#10084;</span>
+          in Tunisia - <%= new Date().getFullYear() %> Loagi
+        </p>
+        <p style="color: #495057; font-size: 14px; margin: 0;">
+          Developed by <strong style="color: #ff6b6b;">Khleifi Louay</strong>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Add smooth scrolling and interaction effects
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add intersection observer for fade-in animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(card);
+    });
+
+    // Trigger initial animations
+    setTimeout(() => {
+      document.querySelectorAll('.card').forEach((card, index) => {
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+    }, 100);
+  </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Loagi - Your gateway to seamless travel across Tunisia. Book intercity trips with ease."/>
+  <title>Loagi - Tunisian Transport</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css"/>
+  <style>
+    /* Page load animation */
+    .page-content {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Nav link hover effect */
+    .nav-link {
+      position: relative;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #ffd43b, #ffe066);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+      width: 80%;
+    }
+
+    /* User greeting */
+    .user-greeting {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #ffd43b, #ffe066);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #212529;
+    }
+
+    .user-name {
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    /* Mobile menu */
+    @media (max-width: 640px) {
+      .user-name {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="app">
+  <header class="hero">
+    <div class="container navbar">
+      <a href="/" class="brand">
+        <span style="display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ffd43b;">
+            <path d="M9 17H5a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm12-2h-4a2 2 0 0 0-2 2 2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+            <path d="M17 17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h8"/>
+            <circle cx="7.5" cy="17" r="2.5"/>
+            <circle cx="17.5" cy="17" r="2.5"/>
+          </svg>
+          Loagi
+        </span>
+      </a>
+      <nav class="nav-actions">
+        <% if (user) { %>
+          <a href="/" class="nav-link">Home</a>
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <div class="user-greeting">
+            <div class="user-avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+            <span class="user-name"><%= user.name || 'User' %></span>
+          </div>
+          <form method="post" action="/logout" style="display:inline; margin: 0;">
+            <button class="btn btn-danger" style="padding: 8px 16px; font-size: 13px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              <span style="margin-left: 4px;">Logout</span>
+            </button>
+          </form>
+        <% } else { %>
+          <a href="/" class="nav-link">Home</a>
+          <a href="/login" class="btn btn-primary" style="padding: 10px 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            <span style="margin-left: 4px;">Login</span>
+          </a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+  <div class="page-content">

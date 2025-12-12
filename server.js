@@ -21,10 +21,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://*.tile.openstreetmap.org"],
+      connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "blob:"],
+      workerSrc: ["'self'", "blob:"],
     },
   },
 }));
@@ -284,27 +285,41 @@ app.get('/dashboard', authRequired(), (req, res) => {
   
   const myBookings = dbw.all(dbw.queries.getBookingsForUser, [req.user.id]);
   const bookings = myBookings; // Ensure bookings is defined for the view
-  res.render('user/dashboard', { trips, myBookings, bookings, user: res.locals.user });
+  const errorMessage = req.query.error || null;
+  res.render('user/dashboard', { trips, myBookings, bookings, user: res.locals.user, errorMessage });
 });
 
 app.post('/book', authRequired(), async (req, res) => {
   const { trip_id } = req.body;
+  const wantsJson = req.headers.accept && req.headers.accept.includes('application/json');
 
   // Check if user already booked this specific trip (prevent duplicate bookings for same trip)
   const existingTripBooking = dbw.get('SELECT * FROM bookings WHERE user_id = ? AND trip_id = ?', [req.user.id, trip_id]);
   if (existingTripBooking) {
-    return res.status(400).send('You have already booked this trip. Each user can only book a trip once.');
+    const errorMsg = 'You have already booked this trip. Each user can only book a trip once.';
+    if (wantsJson) {
+      return res.status(400).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
   }
 
   // Check if user already has an active (unverified) booking for any trip
   const existingBooking = dbw.get('SELECT * FROM bookings WHERE user_id = ? AND verified = 0', [req.user.id]);
   if (existingBooking) {
-    return res.status(400).send('You already have an active booking. Please complete or cancel your current booking before making a new one.');
+    const errorMsg = 'You already have an active booking. Please complete or cancel your current booking before making a new one.';
+    if (wantsJson) {
+      return res.status(400).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
   }
 
   const trip = dbw.get('SELECT * FROM trips WHERE id = ?', [trip_id]);
   if (!trip) {
-    return res.status(404).send('Trip not found.');
+    const errorMsg = 'Trip not found.';
+    if (wantsJson) {
+      return res.status(404).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
   }
 
   const bookingCount = dbw.get('SELECT COUNT(*) as count FROM bookings WHERE trip_id = ? AND verified = 0', [trip_id]).count;
@@ -312,15 +327,26 @@ app.post('/book', authRequired(), async (req, res) => {
   const availableSeats = maxSeats - bookingCount;
 
   if (availableSeats <= 0) {
-    return res.status(400).send('This trip is fully booked. No seats available.');
+    const errorMsg = 'This trip is fully booked. No seats available.';
+    if (wantsJson) {
+      return res.status(400).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
   }
 
   try {
     const bookingCode = generateBookingCode();
     dbw.run(dbw.queries.createBooking, [req.user.id, trip_id, bookingCode]);
+    if (wantsJson) {
+      return res.json({ success: true });
+    }
     res.redirect('/dashboard');
   } catch (e) {
-    res.status(400).send('Booking failed.');
+    const errorMsg = 'Booking failed. Please try again.';
+    if (wantsJson) {
+      return res.status(400).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
   }
 });
 

@@ -444,23 +444,56 @@
 </main>
 
 <script>
-function downloadPDF() {
+async function downloadPDF() {
   const element = document.getElementById('ticket-content');
-  const opt = {
-    margin: 10,
-    filename: 'loagi-ticket-<%= bookingCode %>.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // Hide the action buttons before generating PDF
   const footer = document.querySelector('.ticket-footer');
-  footer.style.display = 'none';
+  const btn = event.target.closest('button');
 
-  html2pdf().set(opt).from(element).save().then(() => {
+  // Show loading state
+  const originalBtnText = btn.innerHTML;
+  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
+  btn.disabled = true;
+
+  try {
+    // Hide the action buttons before generating PDF
+    footer.style.display = 'none';
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: 'loagi-ticket-<%= bookingCode %>.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Check if html2pdf is available
+    if (typeof html2pdf === 'undefined') {
+      throw new Error('PDF library not loaded');
+    }
+
+    await html2pdf().set(opt).from(element).save();
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    alert('Could not generate PDF. Please use the Print option instead and select "Save as PDF".');
+  } finally {
     footer.style.display = '';
-  });
+    btn.innerHTML = originalBtnText;
+    btn.disabled = false;
+  }
 }
 </script>
+<style>
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
 <%- include('../partials/footer') %>

@@ -4,8 +4,11 @@
   "description": "Pretty Tunisian transport app (no native deps, local CSS)",
   "main": "server.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "start": "node server.js",
+    "start": "NODE_ENV=production node server.js",
     "dev": "NODE_ENV=development node server.js",
     "init-db": "node scripts/init-db.js"
   },

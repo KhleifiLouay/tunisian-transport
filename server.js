@@ -12,6 +12,20 @@ const crypto = require('crypto');
 
 const app = express();
 
+// Use fallback JWT secret for production if not set
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'loagi-transport-secret-key-2024-' + crypto.randomBytes(16).toString('hex');
+  console.log('Warning: JWT_SECRET not set, using generated secret');
+}
+
+// Trust proxy for Render.com
+app.set('trust proxy', 1);
+
+// Health check endpoint for Render.com (must be before other middleware)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Generate unique booking code
 function generateBookingCode() {
   return 'LG-' + crypto.randomBytes(4).toString('hex').toUpperCase();

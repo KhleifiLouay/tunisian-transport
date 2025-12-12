@@ -2,7 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_DIR = path.join(__dirname, '..', 'data');
+// Use /tmp for Render.com free tier (ephemeral storage)
+const isProduction = process.env.NODE_ENV === 'production';
+const DB_DIR = isProduction ? '/tmp/data' : path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DB_DIR, 'transport.sqlite');
 
 let SQL = null;
@@ -65,21 +67,58 @@ CREATE TABLE IF NOT EXISTS bookings (
 };
 
 async function init() {
-  if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
-  const initSqlJs = require('sql.js');
-  const SQLLoader = await initSqlJs({
-    locateFile: file => require.resolve('sql.js/dist/sql-wasm.wasm')
-  });
-  SQL = SQLLoader;
+  try {
+    if (!fs.existsSync(DB_DIR)) {
+      fs.mkdirSync(DB_DIR, { recursive: true });
+      console.log('Created database directory:', DB_DIR);
+    }
 
-  if (fs.existsSync(DB_FILE)) {
-    const filebuffer = fs.readFileSync(DB_FILE);
-    db = new SQL.Database(filebuffer);
-  } else {
-    db = new SQL.Database();
+    const initSqlJs = require('sql.js');
+
+    // Try multiple ways to locate the WASM file
+    let SQLLoader;
+    try {
+      SQLLoader = await initSqlJs({
+        locateFile: file => {
+          // Try to find the wasm file in node_modules
+          const wasmPath = path.join(__dirname, '..', 'node_modules', 'sql.js', 'dist', file);
+          if (fs.existsSync(wasmPath)) {
+            return wasmPath;
+          }
+          // Fallback to require.resolve
+          try {
+            return require.resolve(`sql.js/dist/${file}`);
+          } catch (e) {
+            // Last resort - let sql.js handle it
+            return file;
+          }
+        }
+      });
+    } catch (wasmError) {
+      console.log('WASM loading with locateFile failed, trying default...', wasmError.message);
+      // Try without locateFile - sql.js might handle it automatically
+      SQLLoader = await initSqlJs();
+    }
+
+    SQL = SQLLoader;
+    console.log('SQL.js initialized successfully');
+
+    if (fs.existsSync(DB_FILE)) {
+      const filebuffer = fs.readFileSync(DB_FILE);
+      db = new SQL.Database(filebuffer);
+      console.log('Loaded existing database from:', DB_FILE);
+    } else {
+      db = new SQL.Database();
+      console.log('Created new database');
+    }
+
+    db.run(queries.createTables);
+    save();
+    console.log('Database tables initialized');
+  } catch (error) {
+    console.error('Database initialization error:', error);
+    throw error;
   }
-  db.run(queries.createTables);
-  save();
 }
 
 function save() {

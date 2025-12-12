@@ -631,7 +631,26 @@ function ensureReturnTrips() {
     dbw.run(dbw.queries.createUser, ['User', 'user@tt.tn', userHash, 'user']);
   }
   
-  // Ensure admin@gmail.com exists
+  // ALWAYS ensure default admin account exists on every deployment
+  // This admin account will always be available for login on Render.com
+  // Credentials: admin@loagi.tn / AdminLoagi2024!
+  try {
+    const defaultAdmin = dbw.get(dbw.queries.getUserByEmail, ['admin@loagi.tn']);
+    if (!defaultAdmin) {
+      const defaultAdminHash = bcrypt.hashSync('AdminLoagi2024!', 10);
+      dbw.run(dbw.queries.createUser, ['System Admin', 'admin@loagi.tn', defaultAdminHash, 'admin']);
+      console.log('Default admin account created: admin@loagi.tn');
+    } else {
+      // Update password in case it was changed - ensures consistent login on deployment
+      const defaultAdminHash = bcrypt.hashSync('AdminLoagi2024!', 10);
+      dbw.run('UPDATE users SET password_hash = ?, role = ? WHERE email = ?', [defaultAdminHash, 'admin', 'admin@loagi.tn']);
+      console.log('Default admin account verified: admin@loagi.tn');
+    }
+  } catch (e) {
+    console.log('Default admin setup note:', e.message);
+  }
+
+  // Keep legacy admin@gmail.com for backwards compatibility
   const adminGmail = dbw.get(dbw.queries.getUserByEmail, ['admin@gmail.com']);
   if (!adminGmail) {
     const adminGmailHash = bcrypt.hashSync('admin1234', 10);

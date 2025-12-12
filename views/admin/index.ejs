@@ -17,14 +17,11 @@
     font-size: 28px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #fff 0%, #5dade2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #1e3a5f;
   }
 
   .admin-header-content p {
-    color: #94a3b8;
+    color: #495057;
     font-size: 15px;
   }
 
@@ -37,23 +34,20 @@
   .admin-stat {
     text-align: center;
     padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.05);
+    background: white;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(30, 58, 95, 0.15);
   }
 
   .admin-stat .value {
     font-size: 28px;
     font-weight: 800;
-    background: linear-gradient(135deg, #1e3a5f, #3498db);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #1e3a5f;
   }
 
   .admin-stat .label {
     font-size: 12px;
-    color: #64748b;
+    color: #495057;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;
@@ -62,7 +56,7 @@
   .section-title {
     font-size: 20px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #212529;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -82,9 +76,9 @@
 
   .admin-form input,
   .admin-form select {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #f8fafc;
+    background: #fff;
+    border: 1px solid #ced4da;
+    color: #212529;
   }
 
   .admin-form input:focus,
@@ -102,8 +96,8 @@
   }
 
   .user-item {
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 12px;
     padding: 14px 16px;
     display: flex;
@@ -114,7 +108,7 @@
 
   .user-item:hover {
     border-color: rgba(52, 152, 219, 0.3);
-    background: rgba(30, 41, 59, 0.8);
+    background: #e9ecef;
   }
 
   .user-info {
@@ -125,18 +119,18 @@
 
   .user-name {
     font-weight: 600;
-    color: #f8fafc;
+    color: #212529;
     font-size: 14px;
   }
 
   .user-email {
-    color: #64748b;
+    color: #6c757d;
     font-size: 13px;
   }
 
   .trip-manage-card {
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 16px;
@@ -157,7 +151,7 @@
   .trip-route {
     font-size: 18px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #212529;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -172,7 +166,7 @@
   }
 
   .trip-meta {
-    color: #94a3b8;
+    color: #495057;
     font-size: 13px;
     margin-top: 4px;
   }
@@ -198,7 +192,7 @@
     flex-wrap: wrap;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid #dee2e6;
   }
 
   .trip-actions select {
@@ -214,8 +208,8 @@
   }
 
   .user-manage-card {
-    background: rgba(30, 41, 59, 0.6);
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
@@ -237,7 +231,7 @@
   .user-manage-info h3 {
     font-size: 18px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #212529;
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -245,7 +239,7 @@
   }
 
   .user-manage-info p {
-    color: #64748b;
+    color: #495057;
     font-size: 14px;
     margin: 4px 0;
   }
@@ -265,19 +259,20 @@
 
   .user-bookings-section {
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid #dee2e6;
   }
 
   .user-bookings-section h4 {
     font-size: 14px;
-    color: #94a3b8;
+    color: #495057;
     margin-bottom: 12px;
   }
 
   .user-booking-table {
-    background: rgba(0, 0, 0, 0.2);
+    background: white;
     border-radius: 10px;
     overflow: hidden;
+    border: 1px solid #dee2e6;
   }
 
   .user-booking-table table {
@@ -285,7 +280,7 @@
   }
 
   .empty-bookings {
-    color: #64748b;
+    color: #6c757d;
     font-style: italic;
     font-size: 14px;
     padding: 12px;
@@ -439,7 +434,7 @@
         <tbody>
           <% bookings.forEach(b => { %>
             <tr>
-              <td style="font-weight: 600; color: #f8fafc;"><%= b.user_name %></td>
+              <td style="font-weight: 600; color: #212529;"><%= b.user_name %></td>
               <td><%= b.email %></td>
               <td><%= b.origin %> → <%= b.destination %></td>
               <td><%= b.date %></td>
@@ -537,9 +532,9 @@
               <% availableDrivers.forEach(driver => { %>
                 <tr>
                   <td>
-                    <strong style="color: #f8fafc;"><%= driver.full_name %></strong>
+                    <strong style="color: #212529;"><%= driver.full_name %></strong>
                     <br/>
-                    <small style="color: #64748b;"><%= driver.email %></small>
+                    <small style="color: #6c757d;"><%= driver.email %></small>
                   </td>
                   <td><%= driver.id_number %></td>
                   <td><%= driver.available_date %></td>
@@ -608,7 +603,7 @@
                   <tbody>
                     <% u.bookings.forEach(booking => { %>
                       <tr>
-                        <td style="font-weight: 600; color: #f8fafc;"><%= booking.origin %> → <%= booking.destination %></td>
+                        <td style="font-weight: 600; color: #212529;"><%= booking.origin %> → <%= booking.destination %></td>
                         <td><%= booking.date %></td>
                         <td style="color: #14b8a6; font-weight: 600;"><%= booking.price %> TND</td>
                         <td style="font-size: 12px;"><%= booking.created_at %></td>

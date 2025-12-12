@@ -51,6 +51,15 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(user_id) REFERENCES users(id),
   FOREIGN KEY(trip_id) REFERENCES trips(id)
+);
+CREATE TABLE IF NOT EXISTS confirmed_trips (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  trip_id INTEGER NOT NULL,
+  booking_code TEXT NOT NULL,
+  confirmed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id),
+  FOREIGN KEY(trip_id) REFERENCES trips(id)
 );`,
   listTrips: `SELECT * FROM trips ORDER BY date ASC`,
   getUserByEmail: `SELECT * FROM users WHERE email = ?`,

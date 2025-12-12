@@ -219,12 +219,28 @@ app.post('/driver/verify-booking', authRequired('driver'), (req, res) => {
     booking_code: booking.booking_code
   };
 
+  // Save to confirmed_trips table (permanent record that this user used this trip)
+  dbw.run('INSERT INTO confirmed_trips (user_id, trip_id, booking_code) VALUES (?, ?, ?)',
+    [booking.user_id, booking.trip_id, booking.booking_code]);
+
+  // Reduce the available seats on the trip by 1
+  dbw.run('UPDATE trips SET seats = seats - 1 WHERE id = ? AND seats > 0', [booking.trip_id]);
+
   // Delete the booking (QR code is now used and invalid)
   dbw.run('DELETE FROM bookings WHERE booking_code = ?', [booking_code.trim().toUpperCase()]);
 
+  // Refresh assigned trips to show updated seat count
+  const updatedAssignedTrips = dbw.all(`
+    SELECT t.*, d.full_name as driver_name, d.vehicle_model
+    FROM trips t
+    LEFT JOIN drivers d ON d.user_id = t.driver_id
+    WHERE t.driver_id = ?
+    ORDER BY t.date ASC
+  `, [req.user.id]);
+
   return res.render('driver/dashboard', {
     driverInfo,
-    assignedTrips,
+    assignedTrips: updatedAssignedTrips,
     user: res.locals.user,
     verifyResult: passengerInfo,
     verifyError: null
@@ -306,6 +322,16 @@ app.get('/dashboard', authRequired(), (req, res) => {
 app.post('/book', authRequired(), async (req, res) => {
   const { trip_id } = req.body;
   const wantsJson = req.headers.accept && req.headers.accept.includes('application/json');
+
+  // Check if user has already used/confirmed this trip (driver verified their ticket)
+  const confirmedTrip = dbw.get('SELECT * FROM confirmed_trips WHERE user_id = ? AND trip_id = ?', [req.user.id, trip_id]);
+  if (confirmedTrip) {
+    const errorMsg = 'You have already completed this trip. You cannot book the same trip again.';
+    if (wantsJson) {
+      return res.status(400).json({ success: false, error: errorMsg });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
+  }
 
   // Check if user already booked this specific trip (prevent duplicate bookings for same trip)
   const existingTripBooking = dbw.get('SELECT * FROM bookings WHERE user_id = ? AND trip_id = ?', [req.user.id, trip_id]);

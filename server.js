@@ -413,8 +413,11 @@ app.post('/book-with-ticket', authRequired(), async (req, res) => {
 
     const totalCost = booking.price;
 
-    // QR code contains ONLY the booking code for driver to scan/enter
-    const qrCodeData = await QRCode.toDataURL(booking.booking_code, {
+    // QR code contains a URL to the verify page with booking code
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const verifyUrl = `${baseUrl}/verify/${booking.booking_code}`;
+
+    const qrCodeData = await QRCode.toDataURL(verifyUrl, {
       width: 300,
       margin: 2,
       color: {
@@ -595,6 +598,58 @@ app.post('/admin/trips/delete', authRequired('admin'), (req, res) => {
   const { id } = req.body;
   dbw.run(dbw.queries.deleteTrip, [id]);
   res.redirect('/admin');
+});
+
+// QR Code verification page - shows booking info when scanned
+app.get('/verify/:code', (req, res) => {
+  const { code } = req.params;
+
+  // Find the booking with this code
+  const booking = dbw.get(`
+    SELECT b.*, u.name as passenger_name, u.email as passenger_email,
+           t.origin, t.destination, t.date, t.departure_time, t.price,
+           d.full_name as driver_name, d.vehicle_model
+    FROM bookings b
+    JOIN users u ON u.id = b.user_id
+    JOIN trips t ON t.id = b.trip_id
+    LEFT JOIN drivers d ON d.user_id = t.driver_id
+    WHERE b.booking_code = ?
+  `, [code.trim().toUpperCase()]);
+
+  if (!booking) {
+    // Check if it was already used (in confirmed_trips)
+    const usedBooking = dbw.get(`
+      SELECT ct.*, u.name as passenger_name,
+             t.origin, t.destination, t.date, t.departure_time, t.price
+      FROM confirmed_trips ct
+      JOIN users u ON u.id = ct.user_id
+      JOIN trips t ON t.id = ct.trip_id
+      WHERE ct.booking_code = ?
+    `, [code.trim().toUpperCase()]);
+
+    if (usedBooking) {
+      return res.render('verify', {
+        booking: null,
+        usedBooking: usedBooking,
+        error: null,
+        user: res.locals.user
+      });
+    }
+
+    return res.render('verify', {
+      booking: null,
+      usedBooking: null,
+      error: 'Booking not found. This code may be invalid.',
+      user: res.locals.user
+    });
+  }
+
+  res.render('verify', {
+    booking: booking,
+    usedBooking: null,
+    error: null,
+    user: res.locals.user
+  });
 });
 
 // 404

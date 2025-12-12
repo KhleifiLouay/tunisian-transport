@@ -1,0 +1,442 @@
+<%- include('partials/header') %>
+<style>
+  .verify-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .verify-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(30, 58, 95, 0.15);
+  }
+
+  .verify-header {
+    padding: 32px;
+    text-align: center;
+    color: white;
+    position: relative;
+  }
+
+  .verify-header.valid {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+
+  .verify-header.used {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  }
+
+  .verify-header.invalid {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  }
+
+  .verify-header svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  .verify-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .verify-header p {
+    opacity: 0.9;
+    font-size: 14px;
+  }
+
+  .verify-body {
+    padding: 32px;
+  }
+
+  .booking-code-display {
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+    border: 2px solid rgba(230, 126, 34, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .booking-code-display h4 {
+    color: #d35400;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .booking-code-value {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: monospace;
+    letter-spacing: 3px;
+    color: #d35400;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 2px dashed rgba(230, 126, 34, 0.3);
+  }
+
+  .info-section {
+    margin-bottom: 20px;
+  }
+
+  .info-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #868e96;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .info-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #6c757d;
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-weight: 600;
+    color: #212529;
+    font-size: 14px;
+  }
+
+  .info-value.highlight {
+    color: #28a745;
+  }
+
+  .route-display {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.08) 0%, rgba(52, 152, 219, 0.08) 100%);
+    border: 1px solid rgba(30, 58, 95, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .route-cities {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .city-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e3a5f;
+  }
+
+  .route-arrow {
+    color: #3498db;
+  }
+
+  .route-arrow svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .route-meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    color: #6c757d;
+    font-size: 13px;
+  }
+
+  .route-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .route-meta svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .driver-note {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(30, 58, 95, 0.1) 100%);
+    border: 1px solid rgba(52, 152, 219, 0.25);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .driver-note p {
+    color: #1e3a5f;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .driver-note strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #3498db;
+  }
+
+  .error-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+  }
+
+  .error-message svg {
+    width: 64px;
+    height: 64px;
+    color: #dc3545;
+    margin-bottom: 16px;
+  }
+
+  .error-message h2 {
+    color: #212529;
+    margin-bottom: 8px;
+  }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<main class="container">
+  <div class="verify-container">
+    <% if (error) { %>
+      <div class="verify-card">
+        <div class="verify-header invalid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <h1>Invalid Booking</h1>
+          <p>This booking code could not be verified</p>
+        </div>
+        <div class="verify-body">
+          <div class="error-message">
+            <p><%= error %></p>
+          </div>
+          <a href="/" class="back-link">Go to Homepage</a>
+        </div>
+      </div>
+
+    <% } else if (usedBooking) { %>
+      <div class="verify-card">
+        <div class="verify-header used">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <h1>Ticket Already Used</h1>
+          <p>This booking has been verified and completed</p>
+        </div>
+        <div class="verify-body">
+          <div class="booking-code-display">
+            <h4>Booking Code</h4>
+            <div class="booking-code-value"><%= usedBooking.booking_code %></div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+              </svg>
+              Trip Details
+            </div>
+            <div class="route-display">
+              <div class="route-cities">
+                <span class="city-name"><%= usedBooking.origin %></span>
+                <span class="route-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </span>
+                <span class="city-name"><%= usedBooking.destination %></span>
+              </div>
+              <div class="route-meta">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <%= usedBooking.date %>
+                </span>
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <%= usedBooking.departure_time || '08:00' %>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-card">
+              <div class="info-row">
+                <span class="info-label">Passenger</span>
+                <span class="info-value"><%= usedBooking.passenger_name %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Price</span>
+                <span class="info-value highlight"><%= usedBooking.price %> TND</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value" style="color: #6c757d;">Completed</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="/" class="back-link">Go to Homepage</a>
+        </div>
+      </div>
+
+    <% } else if (booking) { %>
+      <div class="verify-card">
+        <div class="verify-header valid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <h1>Valid Booking</h1>
+          <p>This ticket is valid and ready to use</p>
+        </div>
+        <div class="verify-body">
+          <div class="booking-code-display">
+            <h4>Booking Code (Driver ID)</h4>
+            <div class="booking-code-value"><%= booking.booking_code %></div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+              </svg>
+              Trip Details
+            </div>
+            <div class="route-display">
+              <div class="route-cities">
+                <span class="city-name"><%= booking.origin %></span>
+                <span class="route-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </span>
+                <span class="city-name"><%= booking.destination %></span>
+              </div>
+              <div class="route-meta">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <%= booking.date %>
+                </span>
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <%= booking.departure_time || '08:00' %>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Passenger Information
+            </div>
+            <div class="info-card">
+              <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value"><%= booking.passenger_name %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value"><%= booking.passenger_email %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Price</span>
+                <span class="info-value highlight"><%= booking.price %> TND</span>
+              </div>
+              <% if (booking.driver_name) { %>
+              <div class="info-row">
+                <span class="info-label">Driver</span>
+                <span class="info-value"><%= booking.driver_name %> (<%= booking.vehicle_model %>)</span>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="driver-note">
+            <p>Driver: Enter this code in your dashboard to verify the passenger</p>
+            <strong><%= booking.booking_code %></strong>
+          </div>
+
+          <a href="/" class="back-link">Go to Homepage</a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
